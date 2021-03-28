@@ -74,3 +74,45 @@ class VGG():
         image = image.clip(0, 1)
 
         return image
+
+    def get_features(self, image, model, layers=None):
+        """ Run an image forward through a model and get the features for 
+            a set of layers. Default layers are for VGGNet matching Gatys et al (2016)
+        """
+        
+        ## Complete mapping layer names of PyTorch's VGGNet to names from the paper
+        ## Need the layers for the content and style representations of an image
+        if layers is None:
+            layers = {'0': 'conv1_1', 
+                    '5': 'conv2_1', 
+                    '10': 'conv3_1', 
+                    '19': 'conv4_1', 
+                    '21': 'conv4_2',  ## content representation
+                    '28': 'conv5_1'}
+            
+            
+        features = {}
+        x = image
+        # model._modules is a dictionary holding each module in the model
+        # This is the forward pass of the network, pass the image through each
+        # layer of the CNN
+        for name, layer in model._modules.items():
+            x = layer(x)
+            if name in layers:
+                features[layers[name]] = x
+                
+        return features
+
+    def gram_matrix(self, tensor):
+        """ Calculate the Gram Matrix of a given tensor 
+            Gram Matrix: https://en.wikipedia.org/wiki/Gramian_matrix
+        """
+        
+        ## get the batch_size, depth, height, and width of the Tensor
+        batch_size, d, h, w = tensor.size()
+        ## reshape it, so we're multiplying the features for each channel
+        tensor = tensor.view(d, h * w)
+        ## calculate the gram matrix
+        gram = torch.mm(tensor, tensor.t())
+        
+        return gram 
