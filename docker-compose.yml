@@ -9,3 +9,17 @@ services:
     volumes:
       - './frontend:/app'
     command: /bin/sh -c "yarn serve"
+  backend:
+    build:
+      context: "./backend"
+    ports:
+      - '5000:5000'
+    volumes:
+      - './backend:/app'
+    ipc: host
+    shm_size: 1024M
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
