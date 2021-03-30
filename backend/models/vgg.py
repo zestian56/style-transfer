@@ -43,6 +43,10 @@ class VGG():
 
         response = requests.get(img_path)
         image = Image.open(BytesIO(response.content)).convert('RGB')
+        # Convert to uint8
+        image = np.array(image)
+        image = (image.astype(np.float64) / image.max()) * 255
+        image = Image.fromarray(image.astype('uint8'), 'RGB')
         # large images will slow down processing
         if max(image.size) > max_size:
             size = max_size
