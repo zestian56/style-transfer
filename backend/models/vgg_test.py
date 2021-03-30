@@ -33,7 +33,7 @@ class VGGTest(unittest.TestCase):
         
     @patch("torchvision.models.vgg19")
     def test_load_image(self, model_vgg19_mock):
-        # TODO assert different variables in method
+        # TODO MOCK image
         # Arrange
         style_transfer = VGG()
         # Como mockear esta fcking imagen
@@ -52,6 +52,30 @@ class VGGTest(unittest.TestCase):
         self.assertTrue(expected_dim in img.shape[2:])
         batch_size = 1
         self.assertEqual(img.shape[0], batch_size)
+        
+        ### Evaluating a particular max_size
+        
+        # Act
+        expected_dim = 600
+        img = style_transfer.load_image(img_path, max_size = expected_dim)
+        
+        # Assert
+        self.assertTrue(expected_dim in img.shape[2:])
+        expected_shape = torch.Size([1, 3, 983, 600])
+        self.assertEqual(img.shape, expected_shape)
+        
+        ### Evaluating shape != None
+        
+        # Act
+        expected_shape = [400, 500]
+        img = style_transfer.load_image(img_path, shape = expected_shape)
+        
+        # Assert
+        self.assertTrue(img.shape[2:] == torch.Size(expected_shape))
+        expected_shape = torch.Size([1, 3, expected_shape[0], expected_shape[1]])
+        self.assertEqual(img.shape, expected_shape)
+        
+        
         
     @patch("torchvision.models.vgg19")
     def test_im_convert(self, model_vgg19_mock):
@@ -74,7 +98,7 @@ class VGGTest(unittest.TestCase):
         
     @patch("torchvision.models.vgg19")
     def test_get_features(self, model_vgg19_mock):
-        ### TODO ASSERT MORE THINGS
+        ### TODO ASSERT MORE THINGS, I do not know how...
         # Arrange
         style_transfer = VGG()
         img_path = "https://i.imgur.com/qeeo195.jpg"
