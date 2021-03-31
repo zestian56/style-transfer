@@ -40,7 +40,7 @@ class VGGTest(unittest.TestCase):
         img_path = "https://i.imgur.com/qeeo195.jpg"
         
         # Act
-        img = style_transfer.load_image(img_path)
+        img, img_w, img_h = style_transfer.load_image(img_path)
         
         # Assert
         self.assertIsInstance(img, torch.Tensor)
@@ -52,28 +52,36 @@ class VGGTest(unittest.TestCase):
         self.assertTrue(expected_dim in img.shape[2:])
         batch_size = 1
         self.assertEqual(img.shape[0], batch_size)
+        self.assertIsInstance(img_w, int)
+        self.assertIsInstance(img_h, int)
+        self.assertLessEqual(img.shape[3], img_h)
+        self.assertLessEqual(img.shape[2], img_w)
         
         ### Evaluating a particular max_size
         
         # Act
         expected_dim = 600
-        img = style_transfer.load_image(img_path, max_size = expected_dim)
+        img, img_w, img_h = style_transfer.load_image(img_path, max_size = expected_dim)
         
         # Assert
         self.assertTrue(expected_dim in img.shape[2:])
         expected_shape = torch.Size([1, 3, 983, 600])
         self.assertEqual(img.shape, expected_shape)
+        self.assertNotEqual(img.shape[3], img_h)
+        self.assertNotEqual(img.shape[2], img_w)
         
         ### Evaluating shape != None
         
         # Act
         expected_shape = [400, 500]
-        img = style_transfer.load_image(img_path, shape = expected_shape)
+        img, img_w, img_h = style_transfer.load_image(img_path, shape = expected_shape)
         
         # Assert
         self.assertTrue(img.shape[2:] == torch.Size(expected_shape))
         expected_shape = torch.Size([1, 3, expected_shape[0], expected_shape[1]])
         self.assertEqual(img.shape, expected_shape)
+        self.assertNotEqual(img.shape[3], img_h)
+        self.assertNotEqual(img.shape[2], img_w)
         
         
         
