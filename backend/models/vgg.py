@@ -47,6 +47,8 @@ class VGG():
         image = np.array(image)
         image = (image.astype(np.float64) / image.max()) * 255
         image = Image.fromarray(image.astype('uint8'), 'RGB')
+        original_width, original_height = image.size
+
         # large images will slow down processing
         if max(image.size) > max_size:
             size = max_size
@@ -64,7 +66,7 @@ class VGG():
         # discard the transparent, alpha channel (that's the :3) and add the batch dimension
         image = in_transform(image)[:3,:,:].unsqueeze(0)
         
-        return image
+        return image, original_width, original_height
 
     # helper function for un-normalizing an image 
     # and converting it from a Tensor image to a NumPy image for display
