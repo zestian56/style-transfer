@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import json
 import os
+from flask_socketio import emit
 
 #Pytorch
 import torch
@@ -24,27 +25,34 @@ model = VGG()
 
 path = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..', 'static'))
 
-class Transfer(Resource):
-    def post(self):
-        # Request the JSON
-        payload = request.get_json()
+class Transfer():
+    def startProcess(self, payload):
+        
+        emit('updateProcess', { 'progress': 1, 'state': "Loading content image" });
         # Obtain information
         content_file = payload['content']
         style_file = payload['style']
         show_every = payload['show_every']
         steps = payload['steps']
         # load in content and style image
-        content = model.load_image(content_file).to(model.device)
+        content, content_w, content_h = model.load_image(content_file)
+        content = content.to(model.device)
+
         # Update content image
         plt.imshow(model.im_convert(content))
         os.remove(path + '/content.jpg')
         plt.savefig(path +  '/content.jpg')
+        
+        emit('updateProcess', { 'progress': 5, 'state': "Loading style image"  });
         # Resize style to match content, makes code easier
-        style = model.load_image(style_file, shape=content.shape[-2:]).to(model.device)
+        style, _ , _ = model.load_image(style_file, shape=content.shape[-2:])
+        style = style.to(model.device)
+
         # Update style image
         plt.imshow(model.im_convert(style))
         os.remove(path + '/style.jpg')
         plt.savefig(path + '/style.jpg')
+        emit('updateProcess', { 'progress': 10, 'state': "Featuring initiliazation"});
 
         # get content and style features only once before forming the target image
         content_features = model.get_features(content, model.vgg)
@@ -67,7 +75,9 @@ class Transfer(Resource):
         #steps = 1000  # decide how many iterations to update your image (5000) TODO VARIABLE
 
         for ii in range(1, steps+1):
-            
+            progress = (ii*90 / (steps+1) ) + 10
+            iterations = "Iterating {0}/{1}".format(ii, steps)
+            emit('updateProcess', { 'progress': progress, 'state': iterations})
             ## get the features from your target image    
             ## Then calculate the content loss
             target_features = model.get_features(target, model.vgg)
@@ -101,12 +111,19 @@ class Transfer(Resource):
             
             # display intermediate images and print the loss
             if  ii % show_every == 0:
-                print('Total loss: ', total_loss.item())
-                plt.imshow(model.im_convert(target))
+                converted_image = model.im_convert(target)
+                PIL_image = Image.fromarray(np.uint8(converted_image*255)).convert('RGB')
+                img = PIL_image.resize((content_w, content_h), Image.NEAREST)
                 os.remove(path + '/target.jpg')
-                plt.savefig(path + '/target.jpg')
+                img.save(path + '/target.jpg')
+                with open(path + '/target.jpg', 'rb') as f:
+                    image_data = f.read()
+                    emit('updateProcess', { 'progress': progress, 'state': iterations, 'img': image_data })
 
+        
+        emit('updateProcess', { 'progress': 100, 'state': "Finish :D"})
+        emit('endProcess')
         return total_loss.item()
 
     def get():
-	return "Hello :)"
+	    return "Hello :)"
