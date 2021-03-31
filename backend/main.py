@@ -4,21 +4,24 @@
 # Dependencies
 from flask import Flask, render_template, url_for
 from flask import request, redirect
+from flask_cors import CORS
 from flask_restful import Api
 from flask_restful import Resource
 from torchvision import transforms
+from flask_socketio import SocketIO, emit
 
 from resources import Transfer
 
 
 app = Flask(__name__)
-api = Api(app)
+CORS(app)
 
-@app.route("/")
-def hello():
-    return "<h1> Hello this is a test page </h1>"
+socketio = SocketIO(app, cors_allowed_origins="*")
+transfer = Transfer()
 
-api.add_resource(Transfer, '/transfer')
+@socketio.on('startProcess')
+def test_connect(req):
+    transfer.startProcess(req)
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0')
+    socketio.run(app, host='0.0.0.0')

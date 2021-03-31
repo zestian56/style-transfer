@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.btn {
+  @apply font-bold py-2 px-4 rounded;
+}
+
+.btn-blue {
+  @apply bg-blue-500 text-white;
+}
+
+.btn-blue:hover {
+  @apply bg-blue-700;
+}
+
+.btn-orange {
+  @apply text-white;
+  background: #ff9b45;
+}
+  
+.btn-orange:hover {
+ @apply bg-yellow-500;
+}
+
+button-orange {
+    color: #ff9b45;
+}
