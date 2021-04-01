@@ -112,8 +112,8 @@ class Transfer():
             # display intermediate images and print the loss
             if  ii % show_every == 0:
                 converted_image = model.im_convert(target)
-                PIL_image = Image.fromarray(np.uint8(converted_image*255)).convert('RGB')
-                img = PIL_image.resize((content_w, content_h), Image.NEAREST)
+                pil_image = Image.fromarray(np.uint8(converted_image*255)).convert('RGB')
+                img = pil_image.resize((content_w, content_h), Image.NEAREST)
                 os.remove(path + '/target.jpg')
                 img.save(path + '/target.jpg')
                 with open(path + '/target.jpg', 'rb') as f:
@@ -124,6 +124,3 @@ class Transfer():
         emit('updateProcess', { 'progress': 100, 'state': "Finish :D"})
         emit('endProcess')
         return total_loss.item()
-
-    def get():
-	    return "Hello :)"
