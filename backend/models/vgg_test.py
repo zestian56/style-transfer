@@ -141,7 +141,7 @@ class VGGTest(unittest.TestCase):
     @patch("torchvision.models.vgg19")
     @patch("requests.get", get)
     def test_get_features(self, model_vgg19_mock):
-        ### TODO ASSERT MORE THINGS, I do not know how...
+        ### ASSERT COMPLETE ###
         # Arrange
         style_transfer = VGG()
         img_path = None

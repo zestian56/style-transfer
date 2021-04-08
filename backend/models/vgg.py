@@ -1,25 +1,26 @@
 # Dependencies
-from PIL import Image
+import json
+import os
 from io import BytesIO
+import requests
+
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
-import json
-import os
+from PIL import Image
 
 #Pytorch
 import torch
 import torch.optim as optim
-import requests
 from torchvision import transforms, models
 
 class VGG():
     def __init__(self):
-        # get the "features" portion of VGG19 (we will not need the "classifier" portion)
+        # get the "features" portion of VGG19 - remove classifier portion
         self.vgg = models.vgg19(pretrained=True).features
 
-        # freeze all VGG parameters since we're only optimizing the target image
+        # freeze all VGG parameters since we will only optimize target image
         for param in self.vgg.parameters():
             param.requires_grad_(False)
 

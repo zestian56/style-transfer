@@ -1,22 +1,21 @@
 # Dependencies
-from PIL import Image
 from io import BytesIO
+import json
+import os
+import requests
+
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
-import json
-import os
-from flask_socketio import emit
-
+from PIL import Image
 #Pytorch
 import torch
 import torch.optim as optim
-import requests
 from torchvision import transforms, models
 from flask import request
-
-
+# Flask
+from flask_socketio import emit
 from flask_restful import Resource
 
 from models import VGG
@@ -67,18 +66,19 @@ class Transfer():
         target = content.clone().requires_grad_(True).to(model.device)
 
         # for displaying the target image, intermittently
-        #show_every = 100 #TODO THIS HAS TO BE A VARIABLE
+        #show_every = 100 
 
         # iteration hyperparameters
         # Here we specify that the only thing that will be trained is the target image
         optimizer = optim.Adam([target], lr=0.003)
-        #steps = 1000  # decide how many iterations to update your image (5000) TODO VARIABLE
+        #steps = 1000  # decide how many iterations to update your image (5000)
+        target_path = '/target.jpg'
 
         for ii in range(1, steps+1):
             progress = (ii*90 / (steps+1) ) + 10
             iterations = "Iterating {0}/{1}".format(ii, steps)
             emit('updateProcess', { 'progress': progress, 'state': iterations})
-            ## get the features from your target image    
+            ## get the features from target image    
             ## Then calculate the content loss
             target_features = model.get_features(target, model.vgg)
             content_loss = torch.mean((target_features['conv4_2'] - content_features['conv4_2'])**2)
@@ -114,13 +114,12 @@ class Transfer():
                 converted_image = model.im_convert(target)
                 pil_image = Image.fromarray(np.uint8(converted_image*255)).convert('RGB')
                 img = pil_image.resize((content_w, content_h), Image.NEAREST)
-                os.remove(path + '/target.jpg')
-                img.save(path + '/target.jpg')
-                with open(path + '/target.jpg', 'rb') as f:
+                os.remove(path + target_path)
+                img.save(path + target_path)
+                with open(path + target_path, 'rb') as f:
                     image_data = f.read()
                     emit('updateProcess', { 'progress': progress, 'state': iterations, 'img': image_data })
 
-        
         emit('updateProcess', { 'progress': 100, 'state': "Finish :D"})
         emit('endProcess')
         return total_loss.item()
