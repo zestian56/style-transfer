@@ -138,20 +138,33 @@ class VGGTest(unittest.TestCase):
         expected_shape = (test_tensor.shape[2], test_tensor.shape[3], test_tensor.shape[1])
         self.assertEqual(im_converted.shape, expected_shape)
         
-    @patch("torchvision.models.vgg19")
     @patch("requests.get", get)
-    def test_get_features(self, model_vgg19_mock):
+    def test_get_features(self):
         ### ASSERT COMPLETE ###
         # Arrange
         style_transfer = VGG()
         img_path = None
         
         # Act
-        img = style_transfer.load_image(img_path)
-        features = style_transfer.get_features(img, model_vgg19_mock)
+        img, w ,h = style_transfer.load_image(img_path)
+        features = style_transfer.get_features(img.to('cuda'), style_transfer.vgg)
         
         # Assert
         self.assertIsInstance(features, dict)
+        # Assert keys of the features
+        self.assertEqual(list(features.keys()), ['conv1_1', 'conv2_1', 'conv3_1', 'conv4_1', 'conv4_2', 'conv5_1'])
+        # Assert the size of the first conv1_1 map
+        self.assertEqual(features['conv1_1'].shape, torch.Size([1, 64, 533, 400]))
+        # Assert the size of the first conv2_1 map
+        self.assertEqual(features['conv2_1'].shape, torch.Size([1, 128, 266, 200]))
+        # Assert the size of the first conv3_1 map
+        self.assertEqual(features['conv3_1'].shape, torch.Size([1, 256, 133, 100]))
+        # Assert the size of the first conv4_1 map
+        self.assertEqual(features['conv4_1'].shape, torch.Size([1, 512, 66, 50]))
+        # Assert the size of the first conv4_2 map
+        self.assertEqual(features['conv4_2'].shape, torch.Size([1, 512, 66, 50]))
+        # Assert the size of the first conv5_1 map
+        self.assertEqual(features['conv5_1'].shape, torch.Size([1, 512, 33, 25]))
         
     @patch("torchvision.models.vgg19")
     def test_gram_matrix(self, model_vgg19_mock):
