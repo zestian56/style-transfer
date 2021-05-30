@@ -86,3 +86,4 @@ Frontend will be running on [localhost:8080](http://localhost:8080/), and backen
 
 Distributed under the MIT License. See `LICENSE` for more information.
 
+**Note**: The Style-Transfer implementation is based on the one provided by Udacity in their deep learning MOOC [Intro to Deep Learning with PyTorch](https://www.udacity.com/course/deep-learning-pytorch--ud188).
