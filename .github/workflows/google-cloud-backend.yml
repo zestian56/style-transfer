@@ -12,9 +12,6 @@
 
 name: Build and Deploy to GKE
 
-on:
-  release:
-    types: [created]
 
 env:
   PROJECT_ID: ${{ secrets.GKE_PROJECT }}
@@ -23,6 +20,11 @@ env:
   DEPLOYMENT_NAME: gke-test # TODO: update to deployment name
   IMAGE: static-site
 
+on:
+ push:
+ pull_request:
+  branches: [ develop ]
+ workflow_dispatch:
 jobs:
   setup-build-publish-deploy:
     name: Setup, Build, Publish, and Deploy
